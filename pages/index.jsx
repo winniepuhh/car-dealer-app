@@ -1,5 +1,6 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, Suspense } from 'react';
 import Link from 'next/link';
+import { Loading } from './components/loading'
 
 const Home = () => {
   const [makes, setMakes] = useState([]);
@@ -9,9 +10,7 @@ const Home = () => {
 
   useEffect(() => {
     const fetchMakes = async () => {
-      const response = await fetch(
-        'https://vpic.nhtsa.dot.gov/api/vehicles/GetMakesForVehicleType/car?format=json'
-      );
+      const response = await fetch(process.env.NEXT_PUBLIC_VEHICLE_API_URL);
       const data = await response.json();
       setMakes(data.Results);
     };
@@ -52,26 +51,27 @@ const Home = () => {
         </select>
       </div>
 
-      <div className="mb-4">
-        <select
-          className="border border-gray-300 p-2"
-          value={selectedYear}
-          onChange={(e) => setSelectedYear(e.target.value)}
-        >
-          <option value="">Select Model Year</option>
-          {years.map((year) => (
-            <option key={year} value={year}>
-              {year}
-            </option>
-          ))}
-        </select>
-      </div>
+      <Suspense fallback={<Loading />}>
+        <div className="mb-4">
+          <select
+            className="border border-gray-300 p-2"
+            value={selectedYear}
+            onChange={(e) => setSelectedYear(e.target.value)}
+          >
+            <option value="">Select Model Year</option>
+            {years.map((year) => (
+              <option key={year} value={year}>
+                {year}
+              </option>
+            ))}
+          </select>
+        </div>
+      </Suspense>
 
       <Link href={`/result/${selectedMake}/${selectedYear}`}>
         <button
-          className={`px-4 py-2 font-bold text-white bg-blue-500 rounded ${
-            isButtonEnabled ? '' : 'opacity-50 cursor-not-allowed'
-          }`}
+          className={`px-4 py-2 font-bold text-white bg-blue-500 rounded ${isButtonEnabled ? '' : 'opacity-50 cursor-not-allowed'
+            }`}
           disabled={!isButtonEnabled}
         >
           Next
